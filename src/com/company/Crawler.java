@@ -29,12 +29,25 @@ public class Crawler implements PageProcessor {
     private Districtlevel districtlevel = null;
     private DaoImpl dao = new DaoImpl();
 
+
+    /**
+     * provinceList-保存爬取到的省份名称
+     * provinceListA-保存爬取到的省份连接
+     */
     private List<String> provinceListA = null;
     private List<String> provinceList = null;
 
+    /**
+     * toCityList-保存爬取到的市区名称
+     * toCityListA-保存爬取到的市区连接
+     */
     private List<String> toCityListA = null;
     private List<String> toCityList = null;
 
+    /**
+     * districtleveleList-保存爬取到的县区名称
+     * districtleveleListA-保存爬取到的县区连接
+     */
     private List<String> districtleveleListA = null;
     private List<String> districtleveleList = null;
 
