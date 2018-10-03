@@ -12,19 +12,14 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DaoImpl implements Dao {
-
-    private static BaseDao baseDao = BaseDao.getBaseDao();
-    private static PreparedStatement ps = null;
-    private static Connection connection = null;
-    private static ResultSet rs = null;
-    private List<Object> list = new ArrayList<>();
+public class DaoImpl extends BaseDao implements Dao {
 
 
     @Override
     public int districtlevel(Districtlevel districtlevel) {
         String sql = "INSERT INTO districtlevel(districtLevelName,toCityId) VALUES(?,?)";
 
+        List<Object> list = new ArrayList<>();
         list.add(districtlevel.getDistrictLevelName());
         list.add(districtlevel.getToCityId());
 
@@ -43,6 +38,7 @@ public class DaoImpl implements Dao {
 
         String sql = "INSERT INTO province(provinceName) VALUES(?)";
 
+        List<Object> list = new ArrayList<>();
         list.add(province.getProvinceName());
 
         try {
@@ -59,6 +55,7 @@ public class DaoImpl implements Dao {
     public int tocity(ToCity toCity) {
         String sql = "INSERT INTO tocity(toCityName,provinceId) VALUES(?,?)";
 
+        List<Object> list = new ArrayList<>();
         list.add(toCity.getToCityName());
         list.add(toCity.getProvinceId());
 
@@ -75,7 +72,8 @@ public class DaoImpl implements Dao {
     @Override
     public int getID(String sql, String name) {
         try {
-            PreparedStatement ps = baseDao.getConnection().prepareStatement(sql);
+            conn = Open();
+            ps = conn.prepareStatement(sql);
             ps.setString(1, name);
 
             rs = ps.executeQuery();
@@ -86,20 +84,7 @@ public class DaoImpl implements Dao {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-
-                if (ps != null) {
-                    ps.close();
-                }
-                if (connection != null) {
-                    connection.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            Close();
         }
 
         return 0;
@@ -108,8 +93,8 @@ public class DaoImpl implements Dao {
 
     private void intsert(String sql, List<Object> lists) throws SQLException {
         try {
-            ps = baseDao.getConnection().prepareStatement(sql);
-
+            conn = Open();
+            ps = conn.prepareStatement(sql);
             if (lists != null && lists.size() > 0) {
                 for (int i = 0; i < lists.size(); i++) {
 
@@ -119,12 +104,7 @@ public class DaoImpl implements Dao {
             }
         } finally {
 
-            if (ps != null) {
-                ps.close();
-            }
-            if (connection != null) {
-                connection.close();
-            }
+            Close();
 
         }
     }

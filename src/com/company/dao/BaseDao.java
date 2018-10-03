@@ -1,40 +1,52 @@
 package com.company.dao;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class BaseDao {
 
-    private static BaseDao baseDao;
-    private Connection connection;
+    protected Connection conn;
 
+    protected PreparedStatement ps;
 
-    private BaseDao() {
+    protected ResultSet rs;
+
+    public Connection Open(){
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/operation","root","123");
+            conn=DriverManager.getConnection("jdbc:mysql://localhost:3306/webmagic", "root", "123");
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        return conn;
     }
 
-    static class BaseDaoHelp {
-        private static final BaseDao BASE_DAO = new BaseDao();
-    }
+    public void Close()
+    {
+        try {
+            if (rs != null) {
+                rs.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
-    public static synchronized BaseDao getBaseDao() {
-        baseDao = BaseDaoHelp.BASE_DAO;
-        return baseDao;
-    }
+        try {
+            if (ps != null) {
+                ps.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
-    public Connection getConnection() {
-        return connection;
-    }
-
-    public void setConnection(Connection connection) {
-        this.connection = connection;
+        try {
+            if (conn != null) {
+                conn.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

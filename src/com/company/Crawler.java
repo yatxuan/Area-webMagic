@@ -2,6 +2,8 @@ package com.company;
 
 import com.company.dao.DaoImpl;
 import com.company.pojo.Districtlevel;
+import com.company.pojo.Province;
+import com.company.pojo.ToCity;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.Spider;
@@ -16,60 +18,156 @@ import java.util.Map;
 public class Crawler implements PageProcessor {
 
     private Site site = Site.me().setCharset("GBK").setRetryTimes(1000).setSleepTime(1000);
-    private List<String> listA = new ArrayList<>();
-    private Map<String, String> map = new HashMap<>();
+
+    private String name, sql;
+    private Province province = null;
+    private ToCity toCity = null;
+    private Districtlevel districtlevel = null;
     private DaoImpl dao = new DaoImpl();
-    private Districtlevel districtlevel = new Districtlevel();
 
-    public static void main(String[] args) {
+    private List<String> provinceListA = null;
+    private List<String> provinceList = null;
 
-        System.out.println("爬虫开始");
-        Spider.create(new Crawler()).addUrl("http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2016/14.html").thread(10).run();
-        System.out.println("爬虫结束");
-    }
+    private List<String> toCityListA = null;
+    private List<String> toCityList = null;
+
+    private List<String> districtleveleListA = null;
+    private List<String> districtleveleList = null;
+
+    private Map<String, String> map = new HashMap<>();
 
     @Override
     public void process(Page page) {
         Html html = page.getHtml();
 
-        /*if (!html.xpath("//table[@class=\"countytable\"]/tbody/tr[@class=\"countytr\"]/td/a/text()").match()) {
-            List<String> all = html.xpath("//table[@class=\"citytable\"]/tbody/tr[@class=\"citytr\"]/td/a/text()").all();
-            List<String> list2 = html.xpath("//table[@class=\"citytable\"]/tbody/tr[@class=\"citytr\"]/td/a/@href").all();
 
-            System.out.println(all.size());
-            System.out.println(list2.size());
+        if (html.xpath("//tr[@class=\"provincetr\"]/td/a/@href").match()) {
+            System.out.println("开始爬取省份数据：");
+            provinceListA = html.xpath("//tr[@class=\"provincetr\"]/td/a/@href").all();
+            provinceList = html.xpath("//tr[@class=\"provincetr\"]/td/a/text()").all();
 
-            for (int i = 0; i < all.size(); i++) {
-                if (!all.get(i).contains("0")) {
-                    listA.add(list2.get(i));
-                    map.put(list2.get(i), all.get(i));
-                }
-            }
-            System.out.println("开始区级数据爬取：");
-            page.addTargetRequests(listA);
-        } else {
-            List<String> all = html.xpath("//table[@class=\"countytable\"]/tbody/tr[@class=\"countytr\"]/td/a/text()").all();
+            for (int i = 0; i < provinceList.size(); i++) {
 
-            String name = map.get(page.getUrl().toString());
+                System.out.println("名字：" + provinceList.get(i));
+                System.out.println("链接：" + provinceListA.get(i));
+                map.put(provinceListA.get(i), provinceList.get(i));
 
-            int toCityId = dao.getToCityId(name);
-            System.out.println(name + ":" + toCityId);
-            districtlevel.setToCityId(toCityId);
-            for (String i : all) {
-                if (!i.contains("0")) {
-                    districtlevel.setDistrictLevelName(i);
-                    dao.getInsertDis(districtlevel);
-                    System.out.println(i);
+                province = new Province();
+                province.setProvinceName(provinceList.get(i));
 
-                }
+                dao.province(province);
             }
 
-        }*/
+
+            page.addTargetRequests(provinceListA);
+
+        } else if (html.xpath("//tr[@class=\"citytr\"]/td/a/text()").match()) {
+            System.out.println("开始爬取市级数据:");
+
+            toCityList = html.xpath("//tr[@class=\"citytr\"]/td//a/text()").all();
+            toCityListA = html.xpath("//tr[@class=\"citytr\"]/td/a/@href").all();
+
+            for (int i = 0; i < toCityListA.size(); i++) {
+                for (int j = toCityListA.size() - 1; j > i; j--) {
+                    if (toCityListA.get(j).equals(toCityListA.get(i))) {
+                        toCityListA.remove(j);
+                    }
+                }
+            }
+
+            //通过for循环删除 集合类不需要的数据
+            for (int i = 0; i < toCityList.size(); i++) {
+                if (toCityList.get(i).contains("0")) {
+                    toCityList.remove(i);
+                }
+            }
+
+            name = map.get(page.getUrl().toString());
+            System.out.println(name);
+
+            System.out.println(toCityList.size());
+            System.out.println(toCityListA.size());
+
+            sql = "SELECT id from province where provinceName=?";
+
+            int id = dao.getID(sql, name);
+            for (int i = 0; i < toCityList.size(); i++) {
+
+                System.out.println("名字：" + toCityList.get(i));
+                System.out.println("链接：" + toCityListA.get(i));
+                map.put(toCityListA.get(i), toCityList.get(i));
+
+
+                toCity = new ToCity();
+                toCity.setProvinceId(id);
+                toCity.setToCityName(toCityList.get(i));
+
+                dao.tocity(toCity);
+
+            }
+
+            page.addTargetRequests(toCityListA);
+
+        } else if (html.xpath("//tr[@class=\"countytr\"]/td/a/text()").match()) {
+            System.out.println("开始爬取区级数据:");
+
+            districtleveleList = html.xpath("//tr[@class=\"countytr\"]/td//a/text()").all();
+            districtleveleListA = html.xpath("//tr[@class=\"countytr\"]/td/a/@href").all();
+
+            for (int i = 0; i < districtleveleListA.size(); i++) {
+                for (int j = districtleveleListA.size() - 1; j > i; j--) {
+                    if (districtleveleListA.get(j).equals(districtleveleListA.get(i))) {
+                        districtleveleListA.remove(j);
+                    }
+                }
+            }
+
+            //通过for循环删除 集合类不需要的数据
+            for (int i = 0; i < districtleveleList.size(); i++) {
+                if (districtleveleList.get(i).contains("0")) {
+                    districtleveleList.remove(i);
+                }
+            }
+
+
+            name = map.get(page.getUrl().toString());
+            System.out.println(name);
+
+            System.out.println(districtleveleList.size());
+            System.out.println(districtleveleListA.size());
+
+
+            sql = "SELECT id from tocity where toCityName=?";
+
+            int id = dao.getID(sql, name);
+
+            for (int i = 0; i < districtleveleList.size(); i++) {
+
+                System.out.println("名字：" + districtleveleList.get(i));
+                System.out.println("链接：" + districtleveleListA.get(i));
+
+                districtlevel = new Districtlevel();
+                districtlevel.setToCityId(id);
+                districtlevel.setDistrictLevelName(districtleveleList.get(i));
+
+                dao.districtlevel(districtlevel);
+
+            }
+        }
+
 
     }
 
     @Override
     public Site getSite() {
         return site;
+    }
+
+
+    public static void main(String[] args) {
+
+        System.out.println("爬虫开始");
+        Spider.create(new Crawler()).addUrl("http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2016/index.html").run();
+        System.out.println("爬虫结束");
     }
 }
