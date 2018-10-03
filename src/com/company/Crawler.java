@@ -15,6 +15,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 爬虫Main方法
+ * @author ASUS
+ */
 public class Crawler implements PageProcessor {
 
     private Site site = Site.me().setCharset("GBK").setRetryTimes(1000).setSleepTime(1000);

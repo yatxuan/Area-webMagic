@@ -2,6 +2,9 @@ package com.company.dao;
 
 import java.sql.*;
 
+/**
+ * @author ASUS
+ */
 public class BaseDao {
 
     protected Connection conn;
@@ -13,7 +16,7 @@ public class BaseDao {
     public Connection Open(){
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            conn=DriverManager.getConnection("jdbc:mysql://localhost:3306/webmagic", "root", "123");
+            conn=DriverManager.getConnection("jdbc:mysql://localhost:3306/operation", "root", "123");
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (SQLException e) {

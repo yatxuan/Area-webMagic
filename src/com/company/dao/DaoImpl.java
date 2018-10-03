@@ -12,9 +12,17 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author ASUS
+ */
 public class DaoImpl extends BaseDao implements Dao {
 
 
+    /**
+     * 添加区县表数据
+     * @param districtlevel
+     * @return
+     */
     @Override
     public int districtlevel(Districtlevel districtlevel) {
         String sql = "INSERT INTO districtlevel(districtLevelName,toCityId) VALUES(?,?)";
@@ -33,6 +41,11 @@ public class DaoImpl extends BaseDao implements Dao {
         return 0;
     }
 
+    /**
+     * 添加省份表数据
+     * @param province
+     * @return
+     */
     @Override
     public int province(Province province) {
 
@@ -51,6 +64,11 @@ public class DaoImpl extends BaseDao implements Dao {
         return 0;
     }
 
+    /**
+     * 添加市级表数据
+     * @param toCity
+     * @return
+     */
     @Override
     public int tocity(ToCity toCity) {
         String sql = "INSERT INTO tocity(toCityName,provinceId) VALUES(?,?)";
@@ -69,6 +87,12 @@ public class DaoImpl extends BaseDao implements Dao {
         return 0;
     }
 
+    /**
+     * 通过名称获取该名字对应的省份ID或市区ID
+     * @param sql
+     * @param name
+     * @return
+     */
     @Override
     public int getID(String sql, String name) {
         try {
@@ -91,6 +115,12 @@ public class DaoImpl extends BaseDao implements Dao {
     }
 
 
+    /**
+     * 公共添加方法
+     * @param sql
+     * @param lists
+     * @throws SQLException
+     */
     private void intsert(String sql, List<Object> lists) throws SQLException {
         try {
             conn = Open();

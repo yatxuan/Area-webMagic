@@ -5,6 +5,9 @@ import com.company.pojo.Districtlevel;
 import com.company.pojo.Province;
 import com.company.pojo.ToCity;
 
+/**
+ * @author ASUS
+ */
 public interface Dao {
 
     /**
